@@ -44,25 +44,33 @@ Toda interação nossa com o estado do Redux será feito na “Store” através
 
 `store.subscribe()` para escutar a mudança do estado;
 
+*** store.getState
+
 Então seguindo nosso exemplo, o jogador A começa vendo como está o jogo:
 
 `store.getState()`, que no início retornará: [ 1: vazia, 2: vazia, 3: vazia, 4: vazia, 5: vazia, 6: vazia, 7: vazia, 8: vazia, 9: vazia ]
 
 ![image](https://user-images.githubusercontent.com/27368585/75840452-ffc24780-5da9-11ea-9d24-14657e1e4980.png)
 
-Agora o Jogador A marcará um círculo na posição 1, para isso ele usa o store.dispatch
+*** store.dispatch
 
-store.dispatch(ação), a ação contém as informações necessárias de como alterar o estado, neste caso marcar O na posição 1.
+Agora o Jogador A quer marcar um círculo na posição 1, para isso ele deve usar o `store.dispatch`
+
+`store.dispatch(ação)`, a ação contém as informações necessárias de como alterar o estado, neste caso marcar "O" na posição 1.
+
+*** store.subscribe
 
 O Jogador B está esperando a hora dele de jogar, então ele fica “escutando” quando o Jogador A marcar uma posição e então alterar o estado, o B saberá.
 
-store.subscribe(fazer algo) escuta o estado da store e faz algo se esse mudar. Geralmente após escutar é verificado o estado com store.getState() para saber como está.
+`store.subscribe(() => se algo mudar faz isso daqui)` escuta o estado da store e faz algo se esse mudar. Geralmente após escutar é verificado o estado com store.getState() para saber como está.
 
 ![image](https://user-images.githubusercontent.com/27368585/75840482-16689e80-5daa-11ea-8758-f3842942cbb7.png)
 
 E assim o jogo segue…
 
 Até aqui vimos como interagir com uma aplicação Redux já funcionando, agora vamos falar um pouco sobre como implementar esta.
+
+----
 
 Sabemos que a “base” é o Store, mas para criá-lo precisamos primeiro difinir um estado inicial e quem contrala-o. Daqui em diante vamos no código.
 
@@ -95,7 +103,7 @@ O Store espera do Reducer apenas que ele receba um estado e retorne um novo. A s
 - O “type” é usado no “switch” para saber como e que parte do estado alterar.
 - Por fim se não encontrar ou não puder criar um novo estado ele retorna o anterior no “switch default”.
 
-Agora temos o que é necessário para criar a store.
+Agora temos o que é necessário para criar o "reducer" para controlar nossa "store".
 
 ```js
 import { createStore } from 'redux';
@@ -118,9 +126,7 @@ const store = createStore(jogoDaVelha);
 
 E é isso, temos nossa aplicação redux. Vamos jogar! 🤗
 
-### Exemplo
-
-Vamos criar os jogadores.
+Começando criando os jogadores.
 
 ```js
 class Jogador {
@@ -143,7 +149,7 @@ const jogador1 = new Jogador('O');
 const jogador2 = new Jogador('X');
 ```
 
-Fizemos a classe para criar os jogadores e estes só tem a capacidade de marcar uma posição, sem controle algum, só usar o store.dispatch.
+Fizemos a classe para criar os jogadores e estes só tem a capacidade de marcar uma posição, sem controle algum, só usar o `store.dispatch`.
 
 Criamos uma ação que contém as informações necessárias para o reducer saber como proceder.
 
@@ -245,13 +251,9 @@ O subscribe aqui é como a visão dele, que está olhando para o estado esperand
 
 Até aqui da para jogar uma partida completa de Jogo da Velha, mas acredito que algo esteja incomodando vocês ainda
 
-Porque criamos um switch/case no Reducer se ele só tem uma opção? Bom, por padrão todos fazem assim, não vamos fugir dos padrões, mas só acrescentar mais um item que faz todo o sentido.
+Porque criamos um switch/case no Reducer se ele só tem uma opção? Bom, por padrão todos fazem assim, não vamos fugir dos padrões, mas só acrescentar mais um item para o negócio fazer mais sentido.
 
-----
-
-### Voltar ao estado inicial
-
-Zerar o jogo, apagar tudo e começar de novo, é só adicionar uma nova opção no Reducer.
+Para zerar o jogo, apagar tudo e começar de novo, é só adicionar uma nova opção no Reducer.
 
 ```js
 import { createStore } from 'redux';
@@ -277,7 +279,7 @@ function jogoDaVelha (state = initialState, action) {
 const store = createStore(jogoDaVelha);
 ```
 
-A qualquer momento o jogador pode colocar o jogo em seu estado inicial.
+E damos poder aos jogadores de poderem recomeçar a partida.
 
 ```js
 estadoJogo = jogo;
@@ -326,5 +328,7 @@ class Jogador {
 const jogador1 = new Jogador({ nome: 'jogador1', sinal: 'O' });
 const jogador2 = new Jogador({ nome: 'jogador2', sinal: 'X' });
 ```
+
+A qualquer momento o jogador pode colocar o jogo em seu estado inicial usando o `store.dispatch({ type: 'ZERAR_JOGO' })`.
 
 Por enquanto é isso pessoal, espero ter ajudado. Desculpa interromper assim. Algum dia farei uma continuação para aprofundar melhor.
