@@ -87,3 +87,113 @@ function jogoDaVelha (state = initialState, action) {
   }
 }
 ```
+
+O Store espera do Reducer apenas que ele receba um estado e retorne um novo. A sintaxe acima segue os padrões mostrados pelo Redux, que são:
+
+- O 1º parâmetro ser o estado, e no caso de ele ainda não existir no store definir um estado inicial.
+- O 2º parâmetro ser a ação que definirá como alterar o estado e este ter um atributo chamado “type”.
+- O “type” é usado no “switch” para saber como e que parte do estado alterar.
+- Por fim se não encontrar ou não puder criar um novo estado ele retorna o anterior no “switch default”.
+
+Agora temos o que é necessário para criar a store.
+
+```js
+import { createStore } from 'redux';
+
+const initialState = new Array(9);
+
+function jogoDaVelha (state = initialState, action) {
+  switch (action.type) {
+    case 'MARCAR_POSICAO':
+      state[action.posicao - 1] = action.sinal;
+      return state;
+      break;
+  default:
+    return state;
+  }
+}
+
+const store = createStore(jogoDaVelha);
+```
+
+E é isso, temos nossa aplicação redux. Vamos jogar! 🤗
+
+### Exemplo
+
+Vamos criar os jogadores.
+
+```js
+class Jogador {
+  constructor(sinal) {
+    this.sinal = sinal;
+  }
+  
+  marcar(posicao) {
+    const action = { 
+      type:'MARCAR_POSICAO', 
+      posicao,
+      sinal: this.sinal
+    };
+    
+    store.dispatch(action);
+  }
+}
+
+const jogador1 = new Jogador('O');
+const jogador2 = new Jogador('X');
+```
+
+Fizemos a classe para criar os jogadores e estes só tem a capacidade de marcar uma posição, sem controle algum, só usar o store.dispatch.
+
+Criamos uma ação que contém as informações necessárias para o reducer saber como proceder.
+
+- type: conforme esperado lá no switch/case.
+- posicao/sinal: para gerar um novo estado.
+
+As jogadas então ficam assim:
+
+```js
+jogador1.marcar(1);
+```
+
+![image](https://user-images.githubusercontent.com/27368585/75840859-01d8d600-5dab-11ea-87f3-80f4a4b8301e.png)
+
+`store.getState()`: [ 1: ‘O’, 2: vazia, 3: vazia, 4: vazia, 5: vazia, 6: vazia, 7: vazia, 8: vazia, 9: vazia ]
+
+```js
+jogador2.marcar(5);
+```
+
+![image](https://user-images.githubusercontent.com/27368585/75840905-28970c80-5dab-11ea-86f8-9d37e3b630a4.png)
+
+`store.getState()`: [ 1: ‘O’, 2: vazia, 3: vazia, 4: vazia, 5: ‘X’, 6: vazia, 7: vazia, 8: vazia, 9: vazia ]
+
+Beleza, o resultado é um array, mas que tal algo visual? Para fazer isso vamos ficar “escutando” as mudanças para mostrar na tela.
+
+## Subscribe
+
+Colocamos em prática o dispatch, um dos três métodos do store. Agora vamos “prestar atenção no jogo”? Perceber quando é a vez de cada jogador atuar usando o método "subscribe".
+
+Para ilustrar melhor, agora a aplicação que controla os estados agora terá mais de uma atributo em seu estado. O estado do jogo agora é o `state.jogo` e último jogador é o `state.ultimoJogador`.
+
+```js
+import { createStore } from 'redux';
+
+const initialState = { 
+  jogo: new Array(9),
+  ultimoJogador: null
+}
+
+function jogoDaVelha (state = initialState, action) {
+  switch (action.type) {
+    case 'MARCAR_POSICAO':
+      state.jogo[action.posicao - 1] = action.jogador.sinal;
+      state.ultimoJogador = action.jogador;
+      return state;  
+    default:
+      return state;
+  }
+}
+
+const store = createStore(jogoDaVelha);
+```
