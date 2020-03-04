@@ -197,3 +197,134 @@ function jogoDaVelha (state = initialState, action) {
 
 const store = createStore(jogoDaVelha);
 ```
+
+Agora fazer algo bobo, um alert para avisar o jogador que o outro já jogou.
+
+```js
+class Jogador {
+  constructor({ nome, sinal }) {
+    this.nome = nome;
+    this.sinal = sinal;
+    
+    this.prestarAtencao();
+    this.estadoJogo = null;
+  }
+  
+  marcar(posicao) {
+    const { ultimoJogador } = store.getState();
+    if (ultimoJogador === this) return;
+    
+    const action = { 
+      type:'MARCAR_POSICAO', 
+      posicao,
+      jogador: this
+    };    
+    
+    store.dispatch(action);
+  }
+  
+  prestarAtencao() {
+    store.subscribe(() => {
+      const { ultimoJogador, jogo } = store.getState();
+      
+      if (jogo === estadoJogo) return;
+      estadoJogo = jogo;
+      
+      if (ultimoJogador === jogador) return;      
+
+      alert(`${ultimoJogador.nome} jogou`);
+    });
+  }
+}
+
+const jogador1 = new Jogador({ nome: 'jogador1', sinal: 'O' });
+const jogador2 = new Jogador({ nome: 'jogador2', sinal: 'X' });
+```
+
+O subscribe aqui é como a visão dele, que está olhando para o estado esperando uma mudança.
+
+Até aqui da para jogar uma partida completa de Jogo da Velha, mas acredito que algo esteja incomodando vocês ainda
+
+Porque criamos um switch/case no Reducer se ele só tem uma opção? Bom, por padrão todos fazem assim, não vamos fugir dos padrões, mas só acrescentar mais um item que faz todo o sentido.
+
+----
+
+### Voltar ao estado inicial
+
+Zerar o jogo, apagar tudo e começar de novo, é só adicionar uma nova opção no Reducer.
+
+```js
+import { createStore } from 'redux';
+
+const initialState = { 
+  jogo: new Array(9),
+  ultimoJogador: null
+}
+
+function jogoDaVelha (state = initialState, action) {
+  switch (action.type) {
+    case 'MARCAR_POSICAO':
+      state.jogo[action.posicao - 1] = action.jogador.sinal;
+      state.ultimoJogador = action.jogador;
+      return state;
+    case 'RECOMECAR_JOGO':
+      return initialState;
+    default:
+      return state;
+  }
+}
+
+const store = createStore(jogoDaVelha);
+```
+
+A qualquer momento o jogador pode colocar o jogo em seu estado inicial.
+
+```js
+estadoJogo = jogo;
+
+class Jogador {
+  constructor({ nome, sinal }) {
+    this.nome = nome;
+    this.sinal = sinal;
+    
+    this.prestarAtencao();
+    this.estadoJogo = null;
+  }
+  
+  marcar(posicao) {
+    const { ultimoJogador } = store.getState();
+    if (ultimoJogador === this) return;
+    
+    const action = { 
+      type:'MARCAR_POSICAO', 
+      posicao,
+      jogador: this
+    };    
+    
+    store.dispatch(action);
+  }
+  
+  prestarAtencao() {
+    store.subscribe(() => {
+      const { ultimoJogador, jogo } = store.getState();
+      
+      if (jogo === estadoJogo) return;
+      estadoJogo = jogo;
+      
+      if (ultimoJogador === jogador) return;      
+
+      alert(`${ultimoJogador.nome} jogou`);
+    });
+  }
+  
+  zerarJogo() {
+    const action = { type: 'ZERAR_JOGO' };
+    store.dispatch(action);
+  }
+}
+
+const jogador1 = new Jogador({ nome: 'jogador1', sinal: 'O' });
+const jogador2 = new Jogador({ nome: 'jogador2', sinal: 'X' });
+```
+
+Por enquanto é isso pessoal, espero ter ajudado. Desculpa interromper assim. Algum dia farei uma continuação para aprofundar melhor.
