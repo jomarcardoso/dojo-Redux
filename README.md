@@ -49,3 +49,41 @@ Então seguindo nosso exemplo, o jogador A começa vendo como está o jogo:
 `store.getState()`, que no início retornará: [ 1: vazia, 2: vazia, 3: vazia, 4: vazia, 5: vazia, 6: vazia, 7: vazia, 8: vazia, 9: vazia ]
 
 ![image](https://user-images.githubusercontent.com/27368585/75840452-ffc24780-5da9-11ea-9d24-14657e1e4980.png)
+
+Agora o Jogador A marcará um círculo na posição 1, para isso ele usa o store.dispatch
+
+store.dispatch(ação), a ação contém as informações necessárias de como alterar o estado, neste caso marcar O na posição 1.
+
+O Jogador B está esperando a hora dele de jogar, então ele fica “escutando” quando o Jogador A marcar uma posição e então alterar o estado, o B saberá.
+
+store.subscribe(fazer algo) escuta o estado da store e faz algo se esse mudar. Geralmente após escutar é verificado o estado com store.getState() para saber como está.
+
+![image](https://user-images.githubusercontent.com/27368585/75840482-16689e80-5daa-11ea-8758-f3842942cbb7.png)
+
+E assim o jogo segue…
+
+Até aqui vimos como interagir com uma aplicação Redux já funcionando, agora vamos falar um pouco sobre como implementar esta.
+
+Sabemos que a “base” é o Store, mas para criá-lo precisamos primeiro difinir um estado inicial e quem contrala-o. Daqui em diante vamos no código.
+
+```js
+const initialState = new Array(9);
+```
+
+## Reducer
+
+Reducers são os reponsáveis por definirem o estado inicial e alterar este conforme a instrução passada.
+
+```js
+const initialState = new Array(9);
+
+function jogoDaVelha (state = initialState, action) {
+  switch (action.type) {
+    case 'MARCAR_POSICAO':
+      state[action.posicao - 1] = action.sinal;
+      return state;
+    default:
+      return state
+  }
+}
+```
